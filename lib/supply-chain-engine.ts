@@ -100,11 +100,11 @@ export function advanceWeek(state: GameState): GameState {
     const currentHoldingCost = next.roleSettings ? next.roleSettings[role].holdingCost : next.holdingCost;
     const currentBackorderCost = next.roleSettings ? next.roleSettings[role].backorderCost : next.backorderCost;
     const baseline = next.roleSettings ? next.roleSettings[role].initialInventory : next.initialInventory;
-    
+
     // Only charge holding costs for inventory exceeding the baseline
     const billableInventory = Math.max(0, next.roles[role].inventory - baseline);
     const holdCost = currentHoldingCost * billableInventory;
-    
+
     const backCost = currentBackorderCost * next.roles[role].backlog;
     next.roles[role].weekCost = holdCost + backCost;
     next.roles[role].totalCost += next.roles[role].weekCost;
@@ -151,82 +151,50 @@ export function advanceWeek(state: GameState): GameState {
  * A higher β makes the Trend react faster to demand acceleration.
  * Upstream roles use a slightly lower β to prevent over-amplification.
  */
-export function calculateERPAgentOrder(
-  role: Role,
-  state: GameState
-): number {
-  // ─── 1. Role-specific Holt parameters ─────────────────────────────────────
-  let alpha = 0.5;        // Level smoothing factor
-  let beta  = 0.25;       // Trend smoothing factor
-  let amplification = 1.0;
-
-  if (role === 'wholesaler') {
-    alpha = 0.55; beta = 0.30; amplification = 1.05;
-  } else if (role === 'distributor') {
-    alpha = 0.50; beta = 0.25; amplification = 1.10;
-  } else if (role === 'factory') {
-    alpha = 0.45; beta = 0.20; amplification = 1.15;
-  }
+export function calculateERPAgentOrder(role: Role, state: GameState): number {
+  // Config parameters per role
+  const params = {
+    retailer: { alpha: 0.55, beta: 0.10, amp: 1.05 },
+    wholesaler: { alpha: 0.55, beta: 0.10, amp: 1.05 },
+    distributor: { alpha: 0.50, beta: 0.10, amp: 1.10 },
+    factory: { alpha: 0.45, beta: 0.10, amp: 1.15 }
+  }[role];
 
   const roleState = state.roles[role];
-  const capacityLimit = state.roleSettings
-    ? state.roleSettings[role].capacityLimit
-    : state.capacityLimit;
+  const currentIncoming = roleState.incomingOrder ?? 400;
 
-  const currentOrder = roleState.incomingOrder || 400;
-  const historyLen   = state.weekHistory.length;
+  // 1. Gather historical baseline safely
+  const prevSnapshot = state.weekHistory[state.weekHistory.length - 1];
 
-  // ─── 2. Bootstrap Level & Trend from available history ────────────────────
-  // With no history: Level = current demand, Trend = 0
-  // With 1 week: estimate a primitive trend from the delta
-  // With 2+ weeks: run a full Holt pass over the historical series
-  let level: number;
-  let trend: number;
+  // Look for our new persisted state variables, fallback to 400/0 if empty
+  const prevLevel = (prevSnapshot && prevSnapshot.roles[role].holtLevel !== undefined)
+    ? prevSnapshot.roles[role].holtLevel!
+    : (roleState.holtLevel ?? 400);
 
-  if (historyLen === 0) {
-    level = currentOrder;
-    trend = 0;
-  } else if (historyLen === 1) {
-    const prevOrder = state.weekHistory[0].roles[role].incomingOrder;
-    level = alpha * currentOrder + (1 - alpha) * prevOrder;
-    trend = beta * (level - prevOrder) + (1 - beta) * 0;
-  } else {
-    // Collect the demand series in chronological order (oldest → newest → current)
-    const series: number[] = [];
-    for (let i = Math.max(0, historyLen - 4); i < historyLen; i++) {
-      series.push(state.weekHistory[i].roles[role].incomingOrder);
-    }
-    series.push(currentOrder);
+  const prevTrend = (prevSnapshot && prevSnapshot.roles[role].holtTrend !== undefined)
+    ? prevSnapshot.roles[role].holtTrend!
+    : (roleState.holtTrend ?? 0);
 
-    // Initialise with the first two observations
-    level = series[0];
-    trend = series[1] - series[0]; // naive first-pass slope
+  // 2. Holt's Double Exponential Smoothing Calculations
+  const currentLevel = params.alpha * currentIncoming + (1 - params.alpha) * (prevLevel + prevTrend);
+  const currentTrend = params.beta * (currentLevel - prevLevel) + (1 - params.beta) * prevTrend;
 
-    // Run Holt's recurrence over the series
-    for (let i = 1; i < series.length; i++) {
-      const prevLevel = level;
-      const prevTrend = trend;
-      level = alpha * series[i] + (1 - alpha) * (prevLevel + prevTrend);
-      trend = beta  * (level - prevLevel) + (1 - beta) * prevTrend;
-    }
-  }
+  // Save values directly back to active state mutations so they get included in snapshots
+  roleState.holtLevel = currentLevel;
+  roleState.holtTrend = currentTrend;
 
-  // ─── 3. One-period-ahead Holt forecast ────────────────────────────────────
-  const Forecast = Math.max(0, level + trend);
+  const forecast = currentLevel + currentTrend;
 
-  // ─── 4. ERP Order calculation ──────────────────────────────────────────────
-  const BaseOrder = Forecast * amplification;
-  // Target Safety Stock covers the 2-week shipping pipeline lag
-  const TargetSafetyStock = Forecast * 2;
+  // 3. Operational Requirements Matching
+  const baseOrder = forecast * params.amp;
+  const targetSafetyStock = forecast * 2; // 2-week delivery protection parameter
 
-  const EffectiveInventory =
-    roleState.inventory -
-    roleState.backlog +
-    state.shippingPipeline[role][0] +
-    state.shippingPipeline[role][1];
+  const pipeline = state.shippingPipeline[role] ?? [400, 400];
+  const effectiveInventory = roleState.inventory - roleState.backlog + pipeline[0] + pipeline[1];
 
-  const FinalOrder = Math.max(0, BaseOrder + (TargetSafetyStock - EffectiveInventory));
+  // 4. Final Balanced Output
+  const finalOrder = baseOrder + (targetSafetyStock - effectiveInventory);
+  const capacityLimit = state.roleSettings ? state.roleSettings[role].capacityLimit : state.capacityLimit;
 
-  // Clamp to capacity limit
-  return Math.min(Math.round(FinalOrder), capacityLimit);
+  return Math.max(0, Math.min(Math.round(finalOrder), capacityLimit));
 }

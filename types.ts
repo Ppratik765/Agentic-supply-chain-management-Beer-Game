@@ -21,18 +21,18 @@ export const DOWNSTREAM: Record<Role, Role | 'customer'> = {
 
 /** Color theming per role */
 export const ROLE_COLORS: Record<Role, { primary: string; glow: string; bg: string }> = {
-  retailer:    { primary: '#22d3ee', glow: 'rgba(34,211,238,0.3)',  bg: 'rgba(34,211,238,0.08)' },
-  wholesaler:  { primary: '#a78bfa', glow: 'rgba(167,139,250,0.3)', bg: 'rgba(167,139,250,0.08)' },
-  distributor: { primary: '#fbbf24', glow: 'rgba(251,191,36,0.3)',  bg: 'rgba(251,191,36,0.08)' },
-  factory:     { primary: '#34d399', glow: 'rgba(52,211,153,0.3)',  bg: 'rgba(52,211,153,0.08)' },
+  retailer: { primary: '#22d3ee', glow: 'rgba(34,211,238,0.3)', bg: 'rgba(34,211,238,0.08)' },
+  wholesaler: { primary: '#a78bfa', glow: 'rgba(167,139,250,0.3)', bg: 'rgba(167,139,250,0.08)' },
+  distributor: { primary: '#fbbf24', glow: 'rgba(251,191,36,0.3)', bg: 'rgba(251,191,36,0.08)' },
+  factory: { primary: '#34d399', glow: 'rgba(52,211,153,0.3)', bg: 'rgba(52,211,153,0.08)' },
 };
 
 /** Role display metadata */
 export const ROLE_META: Record<Role, { label: string; icon: Role; description: string }> = {
-  retailer:    { label: 'Retailer',    icon: 'retailer', description: 'Sells goods to end customers' },
-  wholesaler:  { label: 'Wholesaler',  icon: 'wholesaler', description: 'Supplies retailers with goods' },
+  retailer: { label: 'Retailer', icon: 'retailer', description: 'Sells goods to end customers' },
+  wholesaler: { label: 'Wholesaler', icon: 'wholesaler', description: 'Supplies retailers with goods' },
   distributor: { label: 'Distributor', icon: 'distributor', description: 'Ships goods from factory to wholesalers' },
-  factory:     { label: 'Factory',     icon: 'factory', description: 'Manufactures and produces goods' },
+  factory: { label: 'Factory', icon: 'factory', description: 'Manufactures and produces goods' },
 };
 
 // ─── Per-Role State ──────────────────────────────────────────────────────────
@@ -46,6 +46,8 @@ export interface RoleState {
   orderPlaced: number;
   weekCost: number;
   totalCost: number;
+  holtLevel?: number;
+  holtTrend?: number;
 }
 
 // ─── Player Info ─────────────────────────────────────────────────────────────
