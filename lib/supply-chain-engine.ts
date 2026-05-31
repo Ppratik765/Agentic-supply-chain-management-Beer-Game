@@ -132,56 +132,99 @@ export function advanceWeek(state: GameState): GameState {
 }
 
 /**
- * Enterprise ERP Agentic Heuristic for AI ordering.
+ * Enterprise ERP Agentic Heuristic — Holt's Double Exponential Smoothing.
  *
- * Parameters based on academic feedback:
- * Wholesaler: smoothness = 0.55, amplification = 1.05
- * Distributor: smoothness = 0.50, amplification = 1.10
- * Factory: smoothness = 0.45, amplification = 1.15
+ * Holt's Model introduces a Trend component alongside the Level, so the agent
+ * can recognise not just what demand IS, but how fast it is CHANGING.
+ *
+ * Equations:
+ *   Level  = α * CurrentOrder + (1 − α) * (PrevLevel + PrevTrend)
+ *   Trend  = β * (Level − PrevLevel) + (1 − β) * PrevTrend
+ *   Forecast = Level + Trend
+ *
+ * Role-specific parameters:
+ *   Wholesaler : α=0.55, β=0.30, amplification=1.05
+ *   Distributor: α=0.50, β=0.25, amplification=1.10
+ *   Factory    : α=0.45, β=0.20, amplification=1.15
+ *
+ * A higher α makes the Level react faster to new orders.
+ * A higher β makes the Trend react faster to demand acceleration.
+ * Upstream roles use a slightly lower β to prevent over-amplification.
  */
 export function calculateERPAgentOrder(
   role: Role,
   state: GameState
 ): number {
-  let smoothness = 0.5;
+  // ─── 1. Role-specific Holt parameters ─────────────────────────────────────
+  let alpha = 0.5;        // Level smoothing factor
+  let beta  = 0.25;       // Trend smoothing factor
   let amplification = 1.0;
 
   if (role === 'wholesaler') {
-    smoothness = 0.55;
-    amplification = 1.05;
+    alpha = 0.55; beta = 0.30; amplification = 1.05;
   } else if (role === 'distributor') {
-    smoothness = 0.50;
-    amplification = 1.10;
+    alpha = 0.50; beta = 0.25; amplification = 1.10;
   } else if (role === 'factory') {
-    smoothness = 0.45;
-    amplification = 1.15;
+    alpha = 0.45; beta = 0.20; amplification = 1.15;
   }
 
   const roleState = state.roles[role];
-  const capacityLimit = state.roleSettings ? state.roleSettings[role].capacityLimit : state.capacityLimit;
+  const capacityLimit = state.roleSettings
+    ? state.roleSettings[role].capacityLimit
+    : state.capacityLimit;
 
-  // 1. Calculate Moving Average (MA) of the last 3 weeks of strict incomingOrder
-  let sumOrders = roleState.incomingOrder || 400;
-  let count = 1;
-  const historyLen = state.weekHistory.length;
-  
-  if (historyLen >= 1) {
-    sumOrders += state.weekHistory[historyLen - 1].roles[role].incomingOrder;
-    count++;
-  }
-  if (historyLen >= 2) {
-    sumOrders += state.weekHistory[historyLen - 2].roles[role].incomingOrder;
-    count++;
-  }
-  const MA = sumOrders / count;
+  const currentOrder = roleState.incomingOrder || 400;
+  const historyLen   = state.weekHistory.length;
 
-  // 2. ERP Math
-  const Forecast = (smoothness * roleState.incomingOrder) + ((1 - smoothness) * MA);
+  // ─── 2. Bootstrap Level & Trend from available history ────────────────────
+  // With no history: Level = current demand, Trend = 0
+  // With 1 week: estimate a primitive trend from the delta
+  // With 2+ weeks: run a full Holt pass over the historical series
+  let level: number;
+  let trend: number;
+
+  if (historyLen === 0) {
+    level = currentOrder;
+    trend = 0;
+  } else if (historyLen === 1) {
+    const prevOrder = state.weekHistory[0].roles[role].incomingOrder;
+    level = alpha * currentOrder + (1 - alpha) * prevOrder;
+    trend = beta * (level - prevOrder) + (1 - beta) * 0;
+  } else {
+    // Collect the demand series in chronological order (oldest → newest → current)
+    const series: number[] = [];
+    for (let i = Math.max(0, historyLen - 4); i < historyLen; i++) {
+      series.push(state.weekHistory[i].roles[role].incomingOrder);
+    }
+    series.push(currentOrder);
+
+    // Initialise with the first two observations
+    level = series[0];
+    trend = series[1] - series[0]; // naive first-pass slope
+
+    // Run Holt's recurrence over the series
+    for (let i = 1; i < series.length; i++) {
+      const prevLevel = level;
+      const prevTrend = trend;
+      level = alpha * series[i] + (1 - alpha) * (prevLevel + prevTrend);
+      trend = beta  * (level - prevLevel) + (1 - beta) * prevTrend;
+    }
+  }
+
+  // ─── 3. One-period-ahead Holt forecast ────────────────────────────────────
+  const Forecast = Math.max(0, level + trend);
+
+  // ─── 4. ERP Order calculation ──────────────────────────────────────────────
   const BaseOrder = Forecast * amplification;
-  const TargetSafetyStock = Forecast * 2; // 2-week shipping delay
-  
-  const EffectiveInventory = roleState.inventory - roleState.backlog + state.shippingPipeline[role][0] + state.shippingPipeline[role][1];
-  
+  // Target Safety Stock covers the 2-week shipping pipeline lag
+  const TargetSafetyStock = Forecast * 2;
+
+  const EffectiveInventory =
+    roleState.inventory -
+    roleState.backlog +
+    state.shippingPipeline[role][0] +
+    state.shippingPipeline[role][1];
+
   const FinalOrder = Math.max(0, BaseOrder + (TargetSafetyStock - EffectiveInventory));
 
   // Clamp to capacity limit
