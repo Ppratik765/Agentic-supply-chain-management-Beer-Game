@@ -78,7 +78,10 @@ export default function DynamicBackground() {
     function spawnShipment() {
       if (shipments.length >= maxShipments) return;
       const path = paths[Math.floor(Math.random() * paths.length)];
-      const colors = ['#ff3333', '#ff5722', '#ff9800', '#ffc107'];
+      const isDark = document.documentElement.classList.contains('dark');
+      const colors = isDark
+        ? ['#22d3ee', '#a78bfa', '#fbbf24', '#34d399']
+        : ['#2b5c8f', '#386641', '#7a528a', '#9c5a3c'];
       shipments.push({
         path,
         progress: 0,
@@ -145,7 +148,7 @@ export default function DynamicBackground() {
     };
 
     // Draw a single wireframe box
-    const drawBox = (ctx: CanvasRenderingContext2D, box: WireframeBox) => {
+    const drawBox = (ctx: CanvasRenderingContext2D, box: WireframeBox, isDark: boolean) => {
       const s = box.size / 2;
       // 8 Vertices of a cube
       let vertices = [
@@ -185,8 +188,10 @@ export default function DynamicBackground() {
       });
 
       // Subtle wireframe color based on depth
-      const alpha = Math.max(0.02, 0.2 - box.z / 600);
-      ctx.strokeStyle = `rgba(255, 87, 34, ${alpha * 1.5})`;
+      const alpha = Math.max(0.01, 0.15 - box.z / 600);
+      ctx.strokeStyle = isDark
+        ? `rgba(255, 87, 34, ${alpha * 1.2})`
+        : `rgba(96, 108, 56, ${alpha * 1.5})`;
       ctx.lineWidth = 1;
       ctx.stroke();
     };
@@ -195,8 +200,15 @@ export default function DynamicBackground() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255, 87, 34, 0.03)' : 'rgba(96, 108, 56, 0.05)';
+      const pathColor = isDark ? 'rgba(255, 87, 34, 0.1)' : 'rgba(96, 108, 56, 0.12)';
+      const nodeStrokeColor = isDark ? 'rgba(255, 87, 34, 0.4)' : 'rgba(96, 108, 56, 0.4)';
+      const nodeFillColor = isDark ? 'rgba(255, 51, 51, 0.15)' : 'rgba(212, 163, 115, 0.2)';
+      const nodeLabelColor = isDark ? 'rgba(255, 87, 34, 0.4)' : 'rgba(96, 108, 56, 0.55)';
+
       // 1. Draw grid layout background
-      ctx.strokeStyle = 'rgba(255, 87, 34, 0.03)';
+      ctx.strokeStyle = gridColor;
       ctx.lineWidth = 1;
       const gridSize = 60;
       for (let x = 0; x < width; x += gridSize) {
@@ -213,7 +225,7 @@ export default function DynamicBackground() {
       }
 
       // 2. Draw Paths between Hubs
-      ctx.strokeStyle = 'rgba(255, 87, 34, 0.1)';
+      ctx.strokeStyle = pathColor;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 5]);
       paths.forEach((path) => {
@@ -239,17 +251,17 @@ export default function DynamicBackground() {
         ctx.lineTo(0, 6);
         ctx.lineTo(-6, 0);
         ctx.closePath();
-        ctx.strokeStyle = 'rgba(255, 87, 34, 0.4)';
+        ctx.strokeStyle = nodeStrokeColor;
         ctx.lineWidth = 1.2;
         ctx.stroke();
 
         // Inner glowing core
-        ctx.fillStyle = 'rgba(255, 51, 51, 0.2)';
+        ctx.fillStyle = nodeFillColor;
         ctx.fill();
         ctx.restore();
 
         ctx.font = '9px monospace';
-        ctx.fillStyle = 'rgba(255, 87, 34, 0.4)';
+        ctx.fillStyle = nodeLabelColor;
         ctx.textAlign = 'center';
         ctx.fillText(node.label, node.x, node.y - 12);
       });
@@ -292,7 +304,7 @@ export default function DynamicBackground() {
         ctx.strokeStyle = grad;
         ctx.lineWidth = 2.5;
         ctx.shadowColor = s.color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = isDark ? 8 : 4;
         ctx.stroke();
         ctx.shadowBlur = 0; // Reset shadow
       }
@@ -315,7 +327,7 @@ export default function DynamicBackground() {
         box.rz += box.vrz;
 
         // Draw
-        drawBox(ctx, box);
+        drawBox(ctx, box, isDark);
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -348,7 +360,7 @@ export default function DynamicBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ background: 'linear-gradient(to bottom, #0a192f, #112240)' }}
+      style={{ backgroundColor: 'var(--bg-primary)' }}
     />
   );
 }

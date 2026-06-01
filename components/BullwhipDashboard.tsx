@@ -44,9 +44,9 @@ export default function BullwhipDashboard({ gameState, playerRole }: BullwhipDas
           const ratio = calculateBullwhipRatio(ordersPlaced, ordersReceived);
           
           let meterColor = c.primary;
-          if (ratio > 2.0) meterColor = '#f87171'; // Red
-          else if (ratio > 1.2) meterColor = '#fbbf24'; // Orange
-          else if (ratio <= 1.0) meterColor = '#34d399'; // Green
+          if (ratio > 2.0) meterColor = 'var(--color-danger)';
+          else if (ratio > 1.2) meterColor = 'var(--color-warning)';
+          else if (ratio <= 1.0) meterColor = 'var(--color-success)';
           
           const ratioDisplay = ratio > 100 ? '> 100' : ratio.toFixed(2);
           
@@ -55,13 +55,13 @@ export default function BullwhipDashboard({ gameState, playerRole }: BullwhipDas
               key={role} 
               className={`flex-1 min-w-[280px] rounded-xl border p-3 flex flex-col transition-all ${isMe ? 'ring-1' : ''}`}
               style={{
-                backgroundColor: `${c.primary}06`,
-                borderColor: `${c.primary}15`,
-                ['--tw-ring-color' as string]: `${c.primary}30`,
+                backgroundColor: c.bg,
+                borderColor: c.glow,
+                ['--tw-ring-color' as string]: c.glow,
               }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-3 border-b border-[rgba(255,255,255,0.05)] pb-2">
+              <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
                 <div className="flex items-center gap-1.5">
                   <RoleIcon role={role} size={16} style={{ color: c.primary }} />
                   <span className="text-sm font-bold" style={{ color: c.primary }}>
@@ -81,7 +81,7 @@ export default function BullwhipDashboard({ gameState, playerRole }: BullwhipDas
               {/* Tabular Data */}
               <div className="flex-1 overflow-y-auto max-h-[250px] pr-1">
                 <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-[#0c1222] z-10 shadow-sm">
+                  <thead className="sticky top-0 bg-[var(--bg-secondary)] z-10 shadow-sm">
                     <tr className="text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
                       <th className="text-left py-1.5 font-semibold">Wk</th>
                       <th className="text-right py-1.5 font-semibold">Inv</th>
@@ -95,11 +95,11 @@ export default function BullwhipDashboard({ gameState, playerRole }: BullwhipDas
                       const rs = snap.roles[role];
                       const limit = gameState.roleSettings ? gameState.roleSettings[role].capacityLimit : gameState.capacityLimit;
                       let invColor = '';
-                      if (rs.inventory > limit) invColor = 'text-[#f87171]';
-                      else if (rs.inventory < limit) invColor = 'text-[#34d399]';
+                      if (rs.inventory > limit) invColor = 'text-[var(--color-danger)]';
+                      else if (rs.inventory < limit) invColor = 'text-[var(--color-success)]';
 
                       return (
-                        <tr key={snap.week} className="border-b border-[var(--border-subtle)] hover:bg-[rgba(255,255,255,0.02)]">
+                        <tr key={snap.week} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-primary)]">
                           <td className="py-1 font-mono font-bold" style={{ color: c.primary }}>{snap.week}</td>
                           <td className={`text-right py-1 tabular-nums ${invColor}`}>{rs.inventory}</td>
                           <td className={`text-right py-1 tabular-nums ${rs.backlog > 0 ? 'text-[var(--color-danger)]' : ''}`}>{rs.backlog}</td>

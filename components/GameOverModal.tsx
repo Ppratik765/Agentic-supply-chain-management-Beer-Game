@@ -23,8 +23,8 @@ export default function GameOverModal({ gameState, playerRole, onPlayAgain }: Ga
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(0,0,0,0.7)] backdrop-blur-sm animate-fade-in">
-        <div className="glass-card-static w-full max-w-lg max-h-[90vh] flex flex-col p-5 sm:p-7 animate-fade-in-up">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+        <div className="modal-card w-full max-w-lg max-h-[90vh] flex flex-col p-5 sm:p-7 animate-fade-in-up">
           {/* Sticky Header - Trophy */}
           <div className="text-center mb-4 flex flex-col items-center flex-shrink-0">
             <Trophy size={36} className="text-[#fbbf24] mb-2 animate-bounce-subtle sm:w-10 sm:h-10" />
@@ -50,9 +50,9 @@ export default function GameOverModal({ gameState, playerRole, onPlayAgain }: Ga
                       isPlayer ? 'ring-1' : ''
                     }`}
                     style={{
-                      backgroundColor: `${colors.primary}08`,
-                      borderColor: isPlayer ? `${colors.primary}40` : `${colors.primary}15`,
-                      ['--tw-ring-color' as string]: `${colors.primary}30`,
+                      backgroundColor: colors.bg,
+                      borderColor: isPlayer ? colors.primary : colors.glow,
+                      ['--tw-ring-color' as string]: colors.glow,
                     }}
                   >
                     <span className="w-7 sm:w-8 flex justify-center flex-shrink-0">
@@ -88,7 +88,7 @@ export default function GameOverModal({ gameState, playerRole, onPlayAgain }: Ga
             </div>
 
             {/* Team Total */}
-            <div className="text-center p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[var(--border-subtle)]">
+            <div className="text-center p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
               <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
                 Team Total Cost
               </div>
@@ -98,7 +98,7 @@ export default function GameOverModal({ gameState, playerRole, onPlayAgain }: Ga
             </div>
 
             {/* Cost Comparison Chart */}
-            <div className="p-3.5 rounded-xl bg-[rgba(255,255,255,0.01)] border border-[var(--border-subtle)]">
+            <div className="p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
               <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2.5">
                 Cost Comparison Breakdown
               </h4>

@@ -22,8 +22,8 @@ export default function DetailedAnalysisTable({ gameState }: DetailedAnalysisTab
         const c = ROLE_COLORS[role];
         
         return (
-          <div key={role} className="rounded-xl border p-3 sm:p-4 bg-[rgba(255,255,255,0.02)] flex flex-col min-w-0" style={{ borderColor: `${c.primary}30` }}>
-            <div className="flex items-center gap-2 mb-3 border-b border-[rgba(255,255,255,0.05)] pb-2 flex-shrink-0">
+          <div key={role} className="rounded-xl border p-3 sm:p-4 bg-[var(--bg-card)] flex flex-col min-w-0" style={{ borderColor: c.glow }}>
+            <div className="flex items-center gap-2 mb-3 border-b border-[var(--border-subtle)] pb-2 flex-shrink-0">
               <RoleIcon role={role} size={18} style={{ color: c.primary }} />
               <h3 className="text-sm font-bold capitalize tracking-wider" style={{ color: c.primary }}>{m.label} - Detailed Log</h3>
             </div>
@@ -73,7 +73,7 @@ export default function DetailedAnalysisTable({ gameState }: DetailedAnalysisTab
                     else if (rs.inventory < limit) invColor = 'text-[#34d399]';
 
                     return (
-                      <tr key={snap.week} className="border-b border-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)] transition-colors">
+                      <tr key={snap.week} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-primary)] transition-colors">
                         <td className="text-left py-1.5 pr-2 font-mono font-bold" style={{ color: c.primary }}>{snap.week}</td>
                         <td className="py-1.5 px-1 tabular-nums text-[var(--text-primary)]">{incomingOrder}</td>
                         <td className="py-1.5 px-1 tabular-nums font-semibold text-[var(--text-primary)]">{rs.orderPlaced}</td>
