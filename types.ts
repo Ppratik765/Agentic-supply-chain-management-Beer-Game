@@ -21,10 +21,10 @@ export const DOWNSTREAM: Record<Role, Role | 'customer'> = {
 
 /** Color theming per role */
 export const ROLE_COLORS: Record<Role, { primary: string; glow: string; bg: string }> = {
-  retailer: { primary: '#22d3ee', glow: 'rgba(34,211,238,0.3)', bg: 'rgba(34,211,238,0.08)' },
-  wholesaler: { primary: '#a78bfa', glow: 'rgba(167,139,250,0.3)', bg: 'rgba(167,139,250,0.08)' },
-  distributor: { primary: '#fbbf24', glow: 'rgba(251,191,36,0.3)', bg: 'rgba(251,191,36,0.08)' },
-  factory: { primary: '#34d399', glow: 'rgba(52,211,153,0.3)', bg: 'rgba(52,211,153,0.08)' },
+  retailer: { primary: 'var(--color-retailer)', glow: 'var(--glow-retailer)', bg: 'var(--bg-retailer)' },
+  wholesaler: { primary: 'var(--color-wholesaler)', glow: 'var(--glow-wholesaler)', bg: 'var(--bg-wholesaler)' },
+  distributor: { primary: 'var(--color-distributor)', glow: 'var(--glow-distributor)', bg: 'var(--bg-distributor)' },
+  factory: { primary: 'var(--color-factory)', glow: 'var(--glow-factory)', bg: 'var(--bg-factory)' },
 };
 
 /** Role display metadata */

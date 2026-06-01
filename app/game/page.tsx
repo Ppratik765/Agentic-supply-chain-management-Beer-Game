@@ -50,10 +50,8 @@ export default function GamePage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Game Info */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <h1 className="text-sm sm:text-lg font-bold tracking-tight whitespace-nowrap">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff3333] to-[#ff9800]">
-                Supply Chain Simulator
-              </span>
+            <h1 className="text-sm sm:text-lg font-bold tracking-tight whitespace-nowrap text-[var(--text-primary)]">
+              Supply Chain Simulator
             </h1>
             <span className="badge badge-room text-[10px] sm:text-xs">{gameState.roomCode}</span>
           </div>
@@ -74,7 +72,7 @@ export default function GamePage() {
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${(gameState.currentWeek / gameState.totalWeeks) * 100}%`,
-                  background: `linear-gradient(90deg, ${colors.primary}80, ${colors.primary})`,
+                  backgroundColor: colors.primary,
                 }}
               />
             </div>
@@ -85,12 +83,12 @@ export default function GamePage() {
             <div className="text-right hidden sm:block">
               <div className="stat-label">Your Cost</div>
               <div className="text-lg font-bold tabular-nums" style={{ color: roleState.totalCost > 0 ? '#f87171' : colors.primary }}>
-                ${roleState.totalCost.toFixed(0)}
+                ₹{roleState.totalCost.toFixed(0)}
               </div>
             </div>
             <div
               className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border text-xs sm:text-sm font-semibold"
-              style={{ borderColor: `${colors.primary}30`, color: colors.primary, backgroundColor: `${colors.primary}10` }}
+              style={{ borderColor: colors.glow, color: colors.primary, backgroundColor: colors.bg }}
             >
               <RoleIcon role={playerRole} size={14} style={{ color: colors.primary }} />
               <span className="hidden sm:inline">{meta.label}</span>
@@ -100,11 +98,11 @@ export default function GamePage() {
       </header>
 
       {/* ─── Mobile-only Quick Stats Bar ─────────────────────────────── */}
-      <div className="sm:hidden px-3 py-2 flex items-center justify-between gap-2 bg-[rgba(15,23,42,0.5)] border-b border-[var(--border-subtle)]">
+      <div className="sm:hidden px-3 py-2 flex items-center justify-between gap-2 bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-[var(--text-muted)] uppercase">Cost:</span>
           <span className="text-xs font-bold tabular-nums" style={{ color: roleState.totalCost > 0 ? '#f87171' : colors.primary }}>
-            ${roleState.totalCost.toFixed(0)}
+            ₹{roleState.totalCost.toFixed(0)}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -156,12 +154,12 @@ export default function GamePage() {
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-subtle)]">
               <div>
                 <div className="stat-label">Team Total</div>
-                <div className="text-base sm:text-lg font-bold tabular-nums text-[var(--text-primary)]">${teamTotal.toFixed(0)}</div>
+                <div className="text-base sm:text-lg font-bold tabular-nums text-[var(--text-primary)]">₹{teamTotal.toFixed(0)}</div>
               </div>
               <div className="text-right">
                 <div className="stat-label">This Week</div>
                 <div className="text-base sm:text-lg font-bold tabular-nums" style={{ color: colors.primary }}>
-                  ${roleState.weekCost.toFixed(1)}
+                  ₹{roleState.weekCost.toFixed(1)}
                 </div>
               </div>
             </div>
@@ -188,7 +186,7 @@ export default function GamePage() {
                   {gameState.weekHistory.slice().reverse().map((snap) => {
                     const rs = snap.roles[playerRole];
                     return (
-                      <tr key={snap.week} className="border-b border-[var(--border-subtle)] hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                      <tr key={snap.week} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-primary)] transition-colors">
                         <td className="py-1.5 font-mono tabular-nums font-bold" style={{ color: colors.primary }}>
                           {snap.week}
                         </td>
@@ -198,7 +196,7 @@ export default function GamePage() {
                           {rs.backlog}
                         </td>
                         <td className="text-right py-1.5 tabular-nums">{rs.orderPlaced}</td>
-                        <td className="text-right py-1.5 tabular-nums font-semibold">${rs.weekCost.toFixed(1)}</td>
+                        <td className="text-right py-1.5 tabular-nums font-semibold">₹{rs.weekCost.toFixed(1)}</td>
                       </tr>
                     );
                   })}

@@ -62,7 +62,7 @@ export default function OrderPanel({
   return (
     <div
       className="glass-card-static p-4 sm:p-5 animate-fade-in-up relative"
-      style={{ borderColor: `${colors.primary}15` }}
+      style={{ borderColor: colors.glow }}
     >
       {/* Header */}
       <div className="flex items-center gap-2.5 sm:gap-3 mb-4">
@@ -108,7 +108,7 @@ export default function OrderPanel({
             </label>
             <div className="flex items-center gap-2">
               <button
-                className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[var(--border-subtle)] flex items-center justify-center text-lg font-bold hover:bg-[rgba(255,255,255,0.1)] transition-colors text-[var(--text-primary)] cursor-pointer flex-shrink-0"
+                className="w-10 h-10 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] flex items-center justify-center text-lg font-bold hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] cursor-pointer flex-shrink-0"
                 onClick={() => setOrderQty(Math.max(0, (orderQty === '' ? 0 : orderQty) - 10))}
               >
                 <Minus size={16} />
@@ -134,7 +134,7 @@ export default function OrderPanel({
                 style={{ color: colors.primary }}
               />
               <button
-                className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[var(--border-subtle)] flex items-center justify-center text-lg font-bold hover:bg-[rgba(255,255,255,0.1)] transition-colors text-[var(--text-primary)] cursor-pointer flex-shrink-0"
+                className="w-10 h-10 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-subtle)] flex items-center justify-center text-lg font-bold hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)] cursor-pointer flex-shrink-0"
                 onClick={() => setOrderQty(Math.min(capacityLimit, (orderQty === '' ? 0 : orderQty) + 10))}
               >
                 <Plus size={16} />
@@ -155,7 +155,7 @@ export default function OrderPanel({
             >
               {isSubmitting ? (
                 <>
-                  <div className="spinner" style={{ borderTopColor: '#0f172a' }} />
+                  <div className="spinner" />
                   Processing...
                 </>
               ) : (
@@ -181,11 +181,11 @@ export default function OrderPanel({
 
       {/* The Centered Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in-up">
-          <div className="glass-card-static max-w-sm w-full p-5 shadow-2xl border border-[var(--border-subtle)] relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-fade-in-up">
+          <div className="modal-card max-w-sm w-full p-5 shadow-2xl border border-[var(--border-subtle)] relative">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-3 right-3 text-[var(--text-muted)] hover:text-white transition-colors p-1"
+              className="absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
             >
               <X size={18} />
             </button>
@@ -218,7 +218,7 @@ export default function OrderPanel({
                 // Close the modal
                 setShowModal(false);
               }}
-              className="mt-5 w-full btn-secondary py-2 border border-[#a78bfa] text-[#a78bfa] hover:bg-[#a78bfa] hover:text-white transition-all"
+              className="mt-5 w-full btn-secondary py-2 border border-[var(--color-wholesaler)] text-[var(--color-wholesaler)] hover:bg-[var(--color-wholesaler)] hover:text-white transition-all"
             >
               Apply Recommendation
             </button>
@@ -231,7 +231,7 @@ export default function OrderPanel({
 
 function StatBox({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="rounded-xl p-2.5 sm:p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-subtle)]">
+    <div className="rounded-xl p-2.5 sm:p-3 bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
       <div className="stat-label text-[9px] sm:text-[0.7rem]">{label}</div>
       <div className="stat-value mt-1" style={{ color, fontSize: 'clamp(1.1rem, 3vw, 1.4rem)' }}>
         {value}

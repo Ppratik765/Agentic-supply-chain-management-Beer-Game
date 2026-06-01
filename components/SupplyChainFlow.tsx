@@ -36,7 +36,7 @@ export default function SupplyChainFlow({ gameState, playerRole }: SupplyChainFl
       <div className="flex items-stretch justify-between w-full gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-1 px-1">
         {/* Customer Node */}
         <div className="flex-shrink-0 flex flex-col items-center justify-center min-w-[56px]">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.2)] flex items-center justify-center text-[#f87171]">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[rgba(220,38,38,0.08)] border border-[rgba(220,38,38,0.2)] flex items-center justify-center text-[var(--color-danger)]">
             <User size={18} />
           </div>
           <span className="text-[10px] text-[var(--text-muted)] mt-1.5 font-medium">Customer</span>
@@ -80,9 +80,9 @@ export default function SupplyChainFlow({ gameState, playerRole }: SupplyChainFl
                   ${isPlayer ? 'ring-2 ring-offset-1 ring-offset-transparent' : ''}
                 `}
                 style={{
-                  backgroundColor: `${colors.primary}08`,
-                  borderColor: isPlayer ? colors.primary : `${colors.primary}20`,
-                  ['--tw-ring-color' as string]: `${colors.primary}40`,
+                  backgroundColor: colors.bg,
+                  borderColor: isPlayer ? colors.primary : colors.glow,
+                  ['--tw-ring-color' as string]: colors.glow,
                 }}
               >
                 {/* Header */}
@@ -102,7 +102,7 @@ export default function SupplyChainFlow({ gameState, playerRole }: SupplyChainFl
                     className="inventory-bar-fill"
                     style={{
                       width: `${invPercent}%`,
-                      background: `linear-gradient(90deg, ${colors.primary}80, ${colors.primary})`,
+                      backgroundColor: colors.primary,
                     }}
                   />
                 </div>
@@ -152,13 +152,16 @@ export default function SupplyChainFlow({ gameState, playerRole }: SupplyChainFl
           <div className="text-[10px] text-[var(--text-muted)] mb-1 tabular-nums font-mono">
             {gameState.shippingPipeline.factory[0]}
           </div>
-          <div className="pipeline-track pipeline-rtl w-full" style={{ ['--glow' as string]: '#34d399' }} />
+          <div className="pipeline-track pipeline-rtl w-full" style={{ ['--glow' as string]: 'var(--color-factory)' }} />
           <div className="text-[10px] text-[var(--text-muted)] mt-1 tabular-nums font-mono">
             {gameState.shippingPipeline.factory[1]}
           </div>
         </div>
         <div className="flex-shrink-0 flex flex-col items-center justify-center min-w-[56px]">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.2)] flex items-center justify-center text-[#34d399]">
+            <div 
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center"
+              style={{ backgroundColor: 'var(--bg-factory)', borderColor: 'var(--glow-factory)', color: 'var(--color-factory)' }}
+            >
               <Cpu size={18} />
             </div>
             <span className="text-[10px] text-[var(--text-muted)] mt-1.5 font-medium">Production</span>

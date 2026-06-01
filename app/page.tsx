@@ -87,10 +87,8 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
       {/* Header */}
       <div className="text-center mb-8 animate-fade-in-up">
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-2">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff3333] via-[#ff5722] to-[#ffc107]">
-            Supply Chain Simulator
-          </span>
+        <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-2 text-[var(--text-primary)]">
+          Supply Chain Simulator
         </h1>
         <p className="text-sm sm:text-base text-[var(--text-muted)] max-w-md mx-auto">
           Supply Chain Simulation: Master the bullwhip effect
@@ -105,7 +103,7 @@ export default function HomePage() {
             className="glass-card p-8 text-center cursor-pointer opacity-0 animate-fade-in-up flex flex-col items-center justify-center"
             onClick={() => handleModeSelect('single')}
           >
-            <Target className="text-[#22d3ee] mb-4" size={40} />
+            <Target className="text-[var(--color-retailer)] mb-4" size={40} />
             <h2 className="text-xl font-bold mb-2">Solo Mission</h2>
             <p className="text-sm text-[var(--text-muted)]">
               Play as one role. AI agents manage the rest.
@@ -117,7 +115,7 @@ export default function HomePage() {
             className="glass-card p-8 text-center cursor-pointer opacity-0 animate-fade-in-up flex flex-col items-center justify-center"
             onClick={() => handleModeSelect('multi')}
           >
-            <Users className="text-[#a78bfa] mb-4" size={40} />
+            <Users className="text-[var(--color-wholesaler)] mb-4" size={40} />
             <h2 className="text-xl font-bold mb-2">Multiplayer</h2>
             <p className="text-sm text-[var(--text-muted)]">
               Create or join a room. Share with friends.
@@ -131,7 +129,7 @@ export default function HomePage() {
         <div className="w-full max-w-2xl animate-fade-in-up">
           <div className="glass-card-static p-6 sm:p-8 mb-6">
             <h2 className="text-lg font-bold mb-5 flex items-center gap-2">
-              <Settings className="text-[#a78bfa]" size={20} /> Game Settings
+              <Settings className="text-[var(--color-wholesaler)]" size={20} /> Game Settings
             </h2>
 
             {/* Player Name */}
@@ -158,7 +156,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${settingsTab === 'global'
-                    ? 'bg-[rgba(255,255,255,0.06)] border border-[var(--border-glow)] text-[var(--text-primary)]'
+                    ? 'bg-[var(--bg-secondary)] border border-[var(--border-glow)] text-[var(--text-primary)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] border border-transparent'
                     }`}
                   onClick={() => setSettingsTab('global')}
@@ -173,7 +171,7 @@ export default function HomePage() {
                       key={r}
                       type="button"
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 border ${isActive
-                        ? 'bg-[rgba(255,255,255,0.04)] text-[var(--text-primary)]'
+                        ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] border-transparent'
                         }`}
                       style={{
@@ -213,7 +211,7 @@ export default function HomePage() {
                   }
                 }}
                 min={0.1} max={5} step={0.1}
-                suffix="$/unit/wk"
+                suffix="₹/unit/wk"
               />
               <SettingInput
                 id="backorder-cost"
@@ -237,7 +235,7 @@ export default function HomePage() {
                   }
                 }}
                 min={0.1} max={10} step={0.1}
-                suffix="$/unit/wk"
+                suffix="₹/unit/wk"
               />
               <SettingInput
                 id="initial-inventory"
@@ -329,7 +327,7 @@ export default function HomePage() {
                   >
                     {store.isLoading ? (
                       <>
-                        <div className="spinner" style={{ borderTopColor: '#0f172a' }} />
+                        <div className="spinner" />
                         <span>Creating...</span>
                       </>
                     ) : (
@@ -379,7 +377,7 @@ export default function HomePage() {
               >
                 {store.isLoading ? (
                   <>
-                    <div className="spinner" style={{ borderTopColor: '#0f172a' }} />
+                    <div className="spinner" />
                     <span>Setting Up...</span>
                   </>
                 ) : (

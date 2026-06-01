@@ -175,6 +175,17 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
     return coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
   };
 
+  // Generate SVG area path for a role (shadow under line)
+  const getAreaPathD = (role: Role) => {
+    if (graphData.length === 0) return '';
+    const coords = graphData.map((d, i) => getCoords(i, d.values[role]));
+    const first = coords[0];
+    const last = coords[coords.length - 1];
+    const baselineY = paddingTop + chartH;
+    const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+    return `${linePath} L ${last.x.toFixed(1)} ${baselineY.toFixed(1)} L ${first.x.toFixed(1)} ${baselineY.toFixed(1)} Z`;
+  };
+
   // Map mouse hover to week index
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -196,8 +207,8 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
   const activeHoveredSnapshot = hoveredWeek !== null ? graphData[hoveredWeek] : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[rgba(0,0,0,0.85)] backdrop-blur-md animate-fade-in">
-      <div className={`glass-card-static w-full ${viewMode === 'table' ? 'max-w-[95vw]' : 'max-w-4xl'} max-h-[95vh] flex flex-col p-4 sm:p-6 animate-fade-in-up transition-all duration-300`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+      <div className={`modal-card w-full ${viewMode === 'table' ? 'max-w-[95vw]' : 'max-w-4xl'} max-h-[95vh] flex flex-col p-4 sm:p-6 animate-fade-in-up transition-all duration-300`}>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)] flex-shrink-0">
           <div className="flex items-center gap-4">
@@ -208,13 +219,13 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
               </h2>
             </div>
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-[rgba(255,255,255,0.05)] rounded-lg p-0.5">
+            <div className="flex items-center bg-[var(--bg-secondary)] rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode('chart')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   viewMode === 'chart' 
-                    ? 'bg-[rgba(167,139,250,0.2)] text-[#a78bfa] shadow-sm' 
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    ? 'bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-primary)] shadow-sm' 
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                 }`}
               >
                 <LineChart size={14} /> Chart
@@ -223,8 +234,8 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                 onClick={() => setViewMode('table')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   viewMode === 'table' 
-                    ? 'bg-[rgba(167,139,250,0.2)] text-[#a78bfa] shadow-sm' 
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    ? 'bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[var(--text-primary)] shadow-sm' 
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                 }`}
               >
                 <Table2 size={14} /> Detailed Log
@@ -233,7 +244,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -259,8 +270,8 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                         onClick={() => setSelectedMetric(m.value)}
                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                           selectedMetric === m.value
-                            ? 'bg-[rgba(167,139,250,0.1)] border-[#a78bfa] text-white shadow-lg'
-                            : 'bg-[rgba(255,255,255,0.02)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)]'
+                            ? 'bg-[var(--bg-secondary)] border-[var(--text-secondary)] text-[var(--text-primary)] shadow-sm'
+                            : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
                         }`}
                       >
                         <div className="text-xs font-bold">{m.label}</div>
@@ -284,7 +295,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                         <button
                           key={role}
                           onClick={() => toggleRole(role)}
-                          className="flex items-center gap-2 p-2 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[var(--border-subtle)] hover:bg-[rgba(255,255,255,0.05)] transition-all text-left cursor-pointer"
+                          className="flex items-center gap-2 p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] transition-all text-left cursor-pointer"
                         >
                           <span style={{ color: colors.primary }}>
                             {isVisible ? <CheckSquare size={16} /> : <Square size={16} className="opacity-40" />}
@@ -371,7 +382,22 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                       );
                     })}
 
-                    {/* SVG Paths for selected roles */}
+                    {/* SVG Paths for selected roles - Areas (Shadows) */}
+                    {ROLES.map((role) => {
+                      if (!visibleRoles[role]) return null;
+                      const colors = ROLE_COLORS[role];
+                      return (
+                        <path
+                          key={`${role}-area`}
+                          d={getAreaPathD(role)}
+                          fill={colors.primary}
+                          fillOpacity={0.12}
+                          className="transition-all duration-300"
+                        />
+                      );
+                    })}
+
+                    {/* SVG Paths for selected roles - Lines */}
                     {ROLES.map((role) => {
                       if (!visibleRoles[role]) return null;
                       const colors = ROLE_COLORS[role];
@@ -398,7 +424,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                           y1={paddingTop}
                           x2={getCoords(hoveredWeek, 0).x}
                           y2={paddingTop + chartH}
-                          stroke="rgba(255,255,255,0.15)"
+                          stroke="var(--border-glow)"
                           strokeWidth={1}
                         />
 
@@ -416,7 +442,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                                 cy={coord.y}
                                 r={3.5}
                                 fill={colors.primary}
-                                stroke="#0f172a"
+                                stroke="var(--bg-primary)"
                                 strokeWidth={1.5}
                               />
                             </g>
@@ -428,10 +454,10 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                 </div>
 
                 {/* Hover Tooltip Stats Box */}
-                <div className="mt-3 py-2 px-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[var(--border-subtle)] min-h-[50px] flex items-center justify-between flex-wrap gap-2.5">
+                <div className="mt-3 py-2 px-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] min-h-[50px] flex items-center justify-between flex-wrap gap-2.5">
                   {hoveredWeek !== null && activeHoveredSnapshot ? (
                     <>
-                      <div className="text-xs font-bold text-white">
+                      <div className="text-xs font-bold text-[var(--text-primary)]">
                         Week {activeHoveredSnapshot.week} Stats
                       </div>
                       <div className="flex gap-4 flex-wrap">
@@ -446,7 +472,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                                 style={{ backgroundColor: colors.primary }}
                               />
                               <span className="text-[var(--text-muted)] capitalize">{role}:</span>
-                              <span className="font-bold tabular-nums text-white">{val}</span>
+                              <span className="font-bold tabular-nums text-[var(--text-primary)]">{val}</span>
                             </div>
                           );
                         })}
@@ -474,7 +500,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                     return (
                       <div
                         key={role}
-                        className="p-4 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[var(--border-subtle)] hover:border-[rgba(255,255,255,0.08)] transition-all flex flex-col justify-between"
+                        className="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-glow)] transition-all flex flex-col justify-between"
                       >
                         <div>
                           {/* Role Badge */}
@@ -485,34 +511,34 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                                 {meta.label}
                               </h4>
                             </div>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.03)] border border-[var(--border-subtle)] ${stats.behaviorColor}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border-subtle)] ${stats.behaviorColor}`}>
                               {stats.behaviorLabel}
-                           </span>
+                            </span>
                           </div>
-
+ 
                           {/* Performance Grid */}
                           <div className="grid grid-cols-3 gap-2 text-center mb-3">
-                            <div className="p-2 rounded-xl bg-[rgba(255,255,255,0.01)] border border-[var(--border-subtle)]">
+                            <div className="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
                               <div className="text-[9px] text-[var(--text-muted)] uppercase font-semibold">
                                 Peak Inv
                               </div>
-                              <div className="text-sm font-bold text-white mt-0.5 tabular-nums">
+                              <div className="text-sm font-bold text-[var(--text-primary)] mt-0.5 tabular-nums">
                                 {stats.peakInventory}
                               </div>
                             </div>
-                            <div className="p-2 rounded-xl bg-[rgba(255,255,255,0.01)] border border-[var(--border-subtle)]">
+                            <div className="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
                               <div className="text-[9px] text-[var(--text-muted)] uppercase font-semibold">
                                 Peak Backlog
                               </div>
-                              <div className="text-sm font-bold text-white mt-0.5 tabular-nums">
+                              <div className="text-sm font-bold text-[var(--text-primary)] mt-0.5 tabular-nums">
                                 {stats.peakBacklog}
                               </div>
                             </div>
-                            <div className="p-2 rounded-xl bg-[rgba(255,255,255,0.01)] border border-[var(--border-subtle)]">
+                            <div className="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-subtle)]">
                               <div className="text-[9px] text-[var(--text-muted)] uppercase font-semibold">
                                 Bullwhip
                               </div>
-                              <div className="text-sm font-bold text-white mt-0.5 tabular-nums">
+                              <div className="text-sm font-bold text-[var(--text-primary)] mt-0.5 tabular-nums">
                                 {stats.bullwhipRatio.toFixed(2)}x
                               </div>
                             </div>
@@ -520,7 +546,7 @@ export default function GameAnalysisModal({ gameState, onClose }: GameAnalysisMo
                         </div>
 
                         {/* Explanatory insights */}
-                        <div className="text-[11px] text-[var(--text-muted)] leading-relaxed border-t border-[var(--border-subtle)] pt-2.5 mt-1 bg-[rgba(255,255,255,0.005)]">
+                        <div className="text-[11px] text-[var(--text-muted)] leading-relaxed border-t border-[var(--border-subtle)] pt-2.5 mt-1">
                           {role === 'retailer' && (
                             <span>
                               Directly exposed to final customer demand. A bullwhip ratio of{' '}

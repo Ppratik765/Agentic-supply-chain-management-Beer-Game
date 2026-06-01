@@ -19,16 +19,40 @@ export default function CostChart({ history, role, height = 80 }: CostChartProps
   const gap = 2;
   const totalW = costs.length * (barW + gap);
 
+  // Map data values to coordinates
+  const points = costs.map((c, i) => {
+    const x = i * (barW + gap) + barW / 2;
+    // Leave a small margin top and bottom
+    const y = height - (c / maxCost) * (height - 8) - 4;
+    return { x, y };
+  });
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const areaPath = points.length > 0
+    ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`
+    : '';
+
   return (
     <div className="w-full overflow-x-auto">
-      <svg width={Math.max(totalW, 100)} height={height} viewBox={`0 0 ${Math.max(totalW, 100)} ${height}`} className="block">
-        {costs.map((cost, i) => {
-          const bh = (cost / maxCost) * (height - 4);
-          return <rect key={i} x={i * (barW + gap)} y={height - bh} width={barW} height={bh} rx={2} fill={colors.primary} opacity={0.6} />;
-        })}
-        {costs.length > 1 && (
-          <polyline fill="none" stroke={colors.primary} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.9}
-            points={costs.map((c, i) => `${i * (barW + gap) + barW / 2},${height - (c / maxCost) * (height - 4)}`).join(' ')} />
+      <svg width={Math.max(totalW, 100)} height={height} viewBox={`0 0 ${Math.max(totalW, 100)} ${height}`} className="block overflow-visible">
+        {points.length > 0 && (
+          <path
+            d={areaPath}
+            fill={colors.primary}
+            fillOpacity={0.15}
+            className="transition-all duration-300"
+          />
+        )}
+        {points.length > 1 && (
+          <path
+            d={linePath}
+            fill="none"
+            stroke={colors.primary}
+            strokeWidth={1.75}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="transition-all duration-300"
+          />
         )}
       </svg>
     </div>
@@ -50,7 +74,7 @@ export function CostComparisonChart({ history }: { history: WeekSnapshot[] }) {
           <div key={role} className="flex items-center gap-3">
             <span className="text-xs font-medium w-20 text-right" style={{ color: c.primary }}>{role.charAt(0).toUpperCase() + role.slice(1)}</span>
             <div className="flex-1 inventory-bar" style={{ height: 12 }}>
-              <div className="inventory-bar-fill" style={{ width: `${(cost / maxCost) * 100}%`, background: `linear-gradient(90deg, ${c.primary}60, ${c.primary})` }} />
+              <div className="inventory-bar-fill" style={{ width: `${(cost / maxCost) * 100}%`, backgroundColor: c.primary }} />
             </div>
             <span className="text-xs font-bold tabular-nums w-16 text-right text-[var(--text-secondary)]">₹{cost.toFixed(0)}</span>
           </div>

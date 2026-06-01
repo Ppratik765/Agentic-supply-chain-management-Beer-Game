@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import DynamicBackground from "@/components/DynamicBackground";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,10 +23,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} dark`} data-scroll-behavior="smooth">
-      <body className="min-h-screen font-[var(--font-inter)]">
+    <html lang="en" className={inter.variable} data-scroll-behavior="smooth">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen font-[var(--font-inter)] bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
         <DynamicBackground />
         <div className="relative z-10">{children}</div>
+        <div className="fixed bottom-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
       </body>
     </html>
   );
